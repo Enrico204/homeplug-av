@@ -13,9 +13,6 @@
 #include "rawsocket.h"
 #include "homeplug-av.h"
 
-#define ATHEROS_HOMEPLUG_AV    { 0x00, 0xb0, 0x52, 0x00, 0x00, 0x01 }
-#define BUF_SIZ                1024
-
 char dstmac[] = ATHEROS_HOMEPLUG_AV;
 
 int main(int argn, char **argv) {
@@ -54,7 +51,7 @@ int main(int argn, char **argv) {
 		return ret;
 	}
 
-	printf("OUI\tStatus\tDeviceId\tUpgradable\tVersion\n");
+	printf("MAC Address\t\tOUI\tStatus\tDeviceId\tUpgradable\tVersion\n");
 
 	while(true) {
 		ssize_t r = receive(sockfd, sendbuf, BUF_SIZ, srcmac);
@@ -68,10 +65,11 @@ int main(int argn, char **argv) {
 			// printf("Version: %d - Packet Type: 0x%04X\n", pkt->header->version, pkt->header->type);
 			// printf("OUI: %02X%02X%02X\n", 0x000000FF & pkt->oui[0], 0x000000FF & pkt->oui[1], 0x000000FF & pkt->oui[2]);
 			struct GetDeviceSWVersionResponse *payload = (struct GetDeviceSWVersionResponse *)(pkt->payload);
-			printf("%02X%02X%02X\t%d\t%d\t\t%c\t\t%s\n",
-				0x000000FF & pkt->oui[0], 0x000000FF & pkt->oui[1], 0x000000FF & pkt->oui[2],
+			printf("%02X:%02X:%02X:%02X:%02X:%02X\t%02X%02X%02X\t%d\t%d\t\t%c\t\t%s\n",
+				(uint8_t)pkt2[0], (uint8_t)pkt2[1], (uint8_t)pkt2[2], (uint8_t)pkt2[3], (uint8_t)pkt2[4], (uint8_t)pkt2[5],
+				(uint8_t)pkt->oui[0], (uint8_t)pkt->oui[1], (uint8_t)pkt->oui[2],
 				payload->status, payload->deviceId, payload->upgradable == 0 ? 'N':'Y', payload->version);
-
+			freeResponse(pkt);
 		}
 	}
 

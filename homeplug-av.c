@@ -3,7 +3,6 @@
 #include <string.h>
 
 
-
 struct HomePlugPacket* parseResponse(char* buf, int len) {
 	assert(buf != NULL);
 	assert(len > 3);
@@ -38,6 +37,60 @@ struct HomePlugPacket* parseResponse(char* buf, int len) {
 
 		payload->upgradable = buf[offset];
 		offset++;
+	} else if (response->header->type == NETWORK_INFO_RES_TYPE) {
+		struct NetworkInfoResponse *payload = malloc(sizeof(struct NetworkInfoResponse));
+		response->payload = payload;
+
+		payload->logicalNetworkNumber = buf[offset];
+		offset++;
+
+		payload->networks = malloc(sizeof(struct NetworkInformation*) * payload->logicalNetworkNumber);
+
+		for (int i = 0; i < payload->logicalNetworkNumber; i++) {
+			struct NetworkInformation *net = malloc(sizeof(struct NetworkInformation));
+
+			memcpy(net->networkId, buf + offset, 7);
+			offset += 7;
+
+			net->shortNetworkId = buf[offset];
+			offset++;
+
+			net->stationRole = buf[offset];
+			offset++;
+
+			memcpy(net->ccoMAC, buf + offset, 6);
+			offset += 6;
+
+			net->ccoTEid = buf[offset];
+
+			payload->networks[i] = net;
+		}
+
+		payload->stationNumber = buf[offset];
+		offset++;
+
+		payload->stations = malloc(sizeof(struct StationInformation*) * payload->stationNumber);
+
+		for (int i = 0; i < payload->stationNumber; i++) {
+			struct StationInformation *info = malloc(sizeof(struct StationInformation));
+
+			memcpy(info->stationMAC, buf + offset, 6),
+			offset += 6;
+
+			info->stationTEid = buf[offset];
+			offset++;
+
+			memcpy(info->firstBridgedNode, buf + offset, 6),
+			offset += 6;
+
+			info->averagePHYTXDataRateMbps = buf[offset];
+			offset++;
+
+			info->averagePHYRXDataRateMbps = buf[offset];
+			offset++;
+
+			payload->stations[i] = info;
+		}
 	}
 	return response;
 }
@@ -47,6 +100,19 @@ void freeResponse(struct HomePlugPacket *response) {
 	if (response->header->type == GET_DEVICE_SW_VERSION_RES_TYPE) {
 		free(((struct GetDeviceSWVersionResponse*)(response->payload))->version);
 		free(response->payload);
+	} else if (response->header->type == NETWORK_INFO_RES_TYPE) {
+		struct NetworkInfoResponse *payload = (struct NetworkInfoResponse *)response->payload;
+		for (int i = 0; i < payload->logicalNetworkNumber; i++) {
+			free(payload->networks[i]);
+		}
+		free(payload->networks);
+
+		for (int i = 0; i < payload->stationNumber; i++) {
+			free(payload->stations[i]);
+		}
+		free(payload->stations);
+
+		free(payload);
 	}
 	free(response->header);
 }
@@ -71,7 +137,8 @@ size_t preparePacket(char *buf, size_t maxsize, struct HomePlugPacket *pkt) {
 	memcpy(buf + 3, pkt->oui, 3);
 	r =+ 3;
 
-	if (pkt->header->type == GET_DEVICE_SW_VERSION_REQ_TYPE) {
+	if (pkt->header->type == GET_DEVICE_SW_VERSION_REQ_TYPE
+		|| pkt->header->type == NETWORK_INFO_REQ_TYPE) {
 		r += 44;
 	}
 
