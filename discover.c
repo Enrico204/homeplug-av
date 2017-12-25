@@ -54,6 +54,8 @@ int main(int argn, char **argv) {
 		return ret;
 	}
 
+	printf("OUI\tStatus\tDeviceId\tUpgradable\tVersion\n");
+
 	while(true) {
 		ssize_t r = receive(sockfd, sendbuf, BUF_SIZ, srcmac);
 		if (r == -1) {
@@ -61,12 +63,15 @@ int main(int argn, char **argv) {
 			break;
 		} else if (r > 0) {
 			char *pkt2 = sendbuf + 14;
+
 			struct HomePlugPacket* pkt = parseResponse(pkt2, r);
-			printf("Version: %d - Packet Type: 0x%04X\n", pkt->header->version, pkt->header->type);
-			printf("OUI: %02X%02X%02X\n", 0x000000FF & pkt->oui[0], 0x000000FF & pkt->oui[1], 0x000000FF & pkt->oui[2]);
+			// printf("Version: %d - Packet Type: 0x%04X\n", pkt->header->version, pkt->header->type);
+			// printf("OUI: %02X%02X%02X\n", 0x000000FF & pkt->oui[0], 0x000000FF & pkt->oui[1], 0x000000FF & pkt->oui[2]);
 			struct GetDeviceSWVersionResponse *payload = (struct GetDeviceSWVersionResponse *)(pkt->payload);
-			printf("Status: %d - DeviceId: %d - Upgradable: %c - Version: %s\n",
-				payload->status, payload->deviceId, payload->upgradable, payload->version);
+			printf("%02X%02X%02X\t%d\t%d\t\t%c\t\t%s\n",
+				0x000000FF & pkt->oui[0], 0x000000FF & pkt->oui[1], 0x000000FF & pkt->oui[2],
+				payload->status, payload->deviceId, payload->upgradable == 0 ? 'N':'Y', payload->version);
+
 		}
 	}
 

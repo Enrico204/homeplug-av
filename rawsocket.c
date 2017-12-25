@@ -49,10 +49,10 @@ int sendtoeth(char* interface, char dstmac[6], char* pkt, size_t pktsize) {
 
 	/* Ethernet header */
 	memcpy(eh->ether_shost, ifmac.ifr_hwaddr.sa_data, 6);
-	printMAC("Src MAC: ", eh->ether_shost);
+	// printMAC("Src MAC: ", eh->ether_shost);
 
 	memcpy(eh->ether_dhost, dstmac, 6);
-	printMAC("Dst MAC: ", eh->ether_dhost);
+	// printMAC("Dst MAC: ", eh->ether_dhost);
 
 	/* Ethertype field */
 	eh->ether_type = htons(ETHTYPE_HOMEPLUG_AV);
@@ -65,7 +65,7 @@ int sendtoeth(char* interface, char dstmac[6], char* pkt, size_t pktsize) {
 		perror("if_nametoindex() failed to obtain interface index ");
 		return EXIT_FAILURE;
 	}
-	printf("Interface %s index %d\n", interface, device.sll_ifindex);
+	// printf("Interface %s index %d\n", interface, device.sll_ifindex);
 
 	device.sll_family = AF_PACKET;
 	/* Address length*/
