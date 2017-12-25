@@ -55,6 +55,9 @@ struct HomePlugPacket* parseResponse(char* buf, int len) {
 			net->shortNetworkId = buf[offset];
 			offset++;
 
+			net->terminalEquipmentIdentifier = buf[offset];
+			offset++;
+
 			net->stationRole = buf[offset];
 			offset++;
 
@@ -62,6 +65,7 @@ struct HomePlugPacket* parseResponse(char* buf, int len) {
 			offset += 6;
 
 			net->ccoTEid = buf[offset];
+			offset++;
 
 			payload->networks[i] = net;
 		}

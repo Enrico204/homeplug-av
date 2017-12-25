@@ -66,7 +66,8 @@ int main(int argn, char **argv) {
 			// printf("OUI: %02X%02X%02X\n", 0x000000FF & pkt->oui[0], 0x000000FF & pkt->oui[1], 0x000000FF & pkt->oui[2]);
 			struct GetDeviceSWVersionResponse *payload = (struct GetDeviceSWVersionResponse *)(pkt->payload);
 			printf("%02X:%02X:%02X:%02X:%02X:%02X\t%02X%02X%02X\t%d\t%d\t\t%c\t\t%s\n",
-				(uint8_t)pkt2[0], (uint8_t)pkt2[1], (uint8_t)pkt2[2], (uint8_t)pkt2[3], (uint8_t)pkt2[4], (uint8_t)pkt2[5],
+				(uint8_t)sendbuf[6], (uint8_t)sendbuf[7], (uint8_t)sendbuf[8],
+				(uint8_t)sendbuf[9], (uint8_t)sendbuf[10], (uint8_t)sendbuf[11],
 				(uint8_t)pkt->oui[0], (uint8_t)pkt->oui[1], (uint8_t)pkt->oui[2],
 				payload->status, payload->deviceId, payload->upgradable == 0 ? 'N':'Y', payload->version);
 			freeResponse(pkt);

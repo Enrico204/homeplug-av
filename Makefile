@@ -1,5 +1,8 @@
 
-all: discover
+all: discover querynetinfo
+
+querynetinfo: querynetinfo.c homeplug-av.o rawsocket.o
+	gcc -g -Wall querynetinfo.c homeplug-av.o rawsocket.o -o querynetinfo
 
 discover: discover.c homeplug-av.o rawsocket.o
 	gcc -g -Wall discover.c homeplug-av.o rawsocket.o -o discover
