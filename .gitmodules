@@ -1,0 +1,3 @@
+[submodule "eclib"]
+	path = eclib
+	url = https://github.com/Enrico204/eclib
